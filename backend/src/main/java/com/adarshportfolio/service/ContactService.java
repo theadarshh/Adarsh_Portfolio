@@ -3,9 +3,12 @@ package com.adarshportfolio.service;
 import com.adarshportfolio.dto.ContactRequest;
 import com.adarshportfolio.model.ContactMessage;
 import com.adarshportfolio.repository.ContactMessageRepository;
+
 import com.resend.Resend;
-import com.resend.services.emails.model.SendEmailRequest;
+import com.resend.services.emails.model.CreateEmailOptions;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +26,7 @@ public class ContactService {
 
     public void handleContact(ContactRequest req) {
 
-        // 1️⃣ Save message to DB
+        // 1️⃣ Save message to database
         ContactMessage msg = new ContactMessage();
         msg.setName(req.getName());
         msg.setEmail(req.getEmail());
@@ -33,8 +36,8 @@ public class ContactService {
 
         Resend resend = new Resend(apiKey);
 
-        // 2️⃣ Send notification to you
-        SendEmailRequest notifyRequest = SendEmailRequest.builder()
+        // 2️⃣ Send notification email to you
+        CreateEmailOptions notifyRequest = CreateEmailOptions.builder()
                 .from("onboarding@resend.dev")
                 .to(notifyEmail)
                 .subject("Portfolio Contact: " + req.getSubject())
@@ -43,8 +46,8 @@ public class ContactService {
 
         resend.emails().send(notifyRequest);
 
-        // 3️⃣ Auto reply to sender
-        SendEmailRequest autoReply = SendEmailRequest.builder()
+        // 3️⃣ Send auto reply to sender
+        CreateEmailOptions autoReply = CreateEmailOptions.builder()
                 .from("onboarding@resend.dev")
                 .to(req.getEmail())
                 .subject("Got your message — Adarsh R")
@@ -55,7 +58,6 @@ public class ContactService {
     }
 
     private String buildBody(ContactRequest req) {
-
         return """
         <h3>New Portfolio Contact</h3>
 
@@ -64,12 +66,15 @@ public class ContactService {
         <b>Subject:</b> %s <br>
 
         <p>%s</p>
-        """.formatted(req.getName(), req.getEmail(),
-                req.getSubject(), req.getMessage());
+        """.formatted(
+                req.getName(),
+                req.getEmail(),
+                req.getSubject(),
+                req.getMessage()
+        );
     }
 
     private String buildAutoReply(ContactRequest req) {
-
         return """
         <p>Hi %s,</p>
 
@@ -79,9 +84,15 @@ public class ContactService {
         <p>%s</p>
 
         <br>
-        <p>Best Regards,<br>
+
+        <p>
+        Best Regards,<br>
         Adarsh R<br>
-        Full Stack Developer</p>
-        """.formatted(req.getName(), req.getMessage());
+        Full Stack Developer
+        </p>
+        """.formatted(
+                req.getName(),
+                req.getMessage()
+        );
     }
 }
