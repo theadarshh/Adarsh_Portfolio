@@ -5,6 +5,7 @@ import com.adarshportfolio.model.ContactMessage;
 import com.adarshportfolio.repository.ContactMessageRepository;
 
 import com.resend.Resend;
+import com.resend.core.exception.ResendException;
 import com.resend.services.emails.model.CreateEmailOptions;
 
 import lombok.RequiredArgsConstructor;
@@ -32,29 +33,43 @@ public class ContactService {
         msg.setEmail(req.getEmail());
         msg.setSubject(req.getSubject());
         msg.setMessage(req.getMessage());
+
         repo.save(msg);
 
-        Resend resend = new Resend(apiKey);
+        try {
 
-        // 2️⃣ Send notification email to you
-        CreateEmailOptions notifyRequest = CreateEmailOptions.builder()
-                .from("onboarding@resend.dev")
-                .to(notifyEmail)
-                .subject("Portfolio Contact: " + req.getSubject())
-                .html(buildBody(req))
-                .build();
+            Resend resend = new Resend(apiKey);
 
-        resend.emails().send(notifyRequest);
+            // 2️⃣ Send notification email to you
+            CreateEmailOptions notifyRequest = CreateEmailOptions.builder()
+                    .from("onboarding@resend.dev")
+                    .to(notifyEmail)
+                    .subject("Portfolio Contact: " + req.getSubject())
+                    .html(buildBody(req))
+                    .build();
 
-        // 3️⃣ Send auto reply to sender
-        CreateEmailOptions autoReply = CreateEmailOptions.builder()
-                .from("onboarding@resend.dev")
-                .to(req.getEmail())
-                .subject("Got your message — Adarsh R")
-                .html(buildAutoReply(req))
-                .build();
+            resend.emails().send(notifyRequest);
 
-        resend.emails().send(autoReply);
+            // 3️⃣ Send auto reply to sender
+            CreateEmailOptions autoReply = CreateEmailOptions.builder()
+                    .from("onboarding@resend.dev")
+                    .to(req.getEmail())
+                    .subject("Got your message — Adarsh R")
+                    .html(buildAutoReply(req))
+                    .build();
+
+            resend.emails().send(autoReply);
+
+        } catch (ResendException e) {
+
+            System.out.println("Resend email error: " + e.getMessage());
+
+        } catch (Exception e) {
+
+            System.out.println("Unexpected email error");
+            e.printStackTrace();
+
+        }
     }
 
     private String buildBody(ContactRequest req) {
