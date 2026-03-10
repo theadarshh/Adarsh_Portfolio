@@ -3,7 +3,7 @@
 A modern **full-stack developer portfolio** designed to showcase my skills, projects, certifications, and coding profiles.
 The website integrates real-time developer statistics and provides a professional way for recruiters and collaborators to explore my work.
 
-🌐 **Live Website:** https://adarshportfolio-eight.vercel.app
+🌐 **Live Website:** https://adarsh-profile.vercel.app
 
 ---
 
